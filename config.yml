@@ -4,6 +4,12 @@ slurm:
     max_processors: 20
     ram_per_processor: 2
 
+lsf:
+    wall_time: "03:59"
+    atoms_per_processor: 6
+    max_processors: 20
+    ram_per_processor: 6
+
 mongoDB:
     host: "128.112.127.147"
     port: 27017

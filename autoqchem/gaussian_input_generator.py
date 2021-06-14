@@ -40,13 +40,13 @@ class gaussian_input_generator(object):
         if workflow_type == "equilibrium":
             self.tasks = (
                 f"opt=CalcFc {theory}/{basis_set} scf=xqc",
-                f"freq {theory}/{basis_set} volume NMR pop=NPA density=current Geom=AllCheck Guess=Read",
-                f"TD(NStates=10, Root=1) {theory}/{basis_set} volume pop=NPA density=current Geom=AllCheck Guess=Read"
+                f"freq {theory}/{basis_set} volume NMR pop=NPA6 density=current Geom=AllCheck Guess=Read",
+                f"TD(NStates=10, Root=1) {theory}/{basis_set} volume pop=NPA6 density=current Geom=AllCheck Guess=Read"
             )
         elif workflow_type == "transition_state":
             self.tasks = (
                 f"opt=(calcfc,ts,noeigentest) scf=xqc {theory}/{basis_set}",
-                f"freq {theory}/{basis_set} volume NMR pop=NPA density=current Geom=AllCheck Guess=Read"
+                f"freq {theory}/{basis_set} volume NMR pop=NPA6 density=current Geom=AllCheck Guess=Read"
             )
         elif workflow_type == "test":
             self.tasks = (
@@ -56,17 +56,20 @@ class gaussian_input_generator(object):
             raise ValueError(f"Not supported gaussian job type {workflow_type}. "
                              f"Allowed types are: equilibrium, transition_state.")
 
-    def create_gaussian_files(self) -> None:
-        """Create the actual gaussian files for each conformer of the molecule."""
+    def create_gaussian_files(self, queue_system) -> None:
+        """
+        Create the actual gaussian files for each conformer of the molecule.
+        :type queue_system: str
+        """
 
         # prepare directory for gaussian files
         cleanup_directory_files(self.directory, types=["gjf"])
         os.makedirs(self.directory, exist_ok=True)
 
         # resources configuration
-        n_processors = max(1, min(config['slurm']['max_processors'],
-                                  self.molecule.mol.NumAtoms() // config['slurm']['atoms_per_processor']))
-        ram = n_processors * config['slurm']['ram_per_processor']
+        n_processors = max(1, min(config[queue_system]['max_processors'],
+                                  self.molecule.mol.NumAtoms() // config[queue_system]['atoms_per_processor']))
+        ram = n_processors * config[queue_system]['ram_per_processor']
         resource_block = f"%nprocshared={n_processors}\n%Mem={ram}GB\n"
 
         logger.info(f"Generating Gaussian input files for {self.molecule.mol.NumConformers()} conformations.")

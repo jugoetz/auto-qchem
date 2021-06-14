@@ -108,7 +108,7 @@ class slurm_manager(object):
         #                    f" Not creating jobs.")
         #     return
 
-        gig.create_gaussian_files()
+        gig.create_gaussian_files('slurm')
 
         # create slurm files
         for gjf_file in glob.glob(f"{molecule_workdir}/*.gjf"):
@@ -569,7 +569,6 @@ class slurm_manager(object):
 
 class lsf_manager(object):
     """LSF manager class."""
-    # TODO execute "module load gaussian" on connection to server
 
     def __init__(self, user, host):
         """Initialize LSF manager and load the cache file.
@@ -625,8 +624,7 @@ class lsf_manager(object):
                                  light_basis_set="6-31G*",
                                  heavy_basis_set="LANL2DZ",
                                  generic_basis_set="genecp",
-                                 max_light_atomic_number=36,
-                                 wall_time='23:59') -> None:
+                                 max_light_atomic_number=36) -> None:
         """Generate LSF jobs for a molecule. Gaussian input files are also generated.
 
         :param molecule: molecule object
@@ -643,8 +641,6 @@ class lsf_manager(object):
         :type generic_basis_set: str
         :param max_light_atomic_number: maximum atomic number for light elements
         :type max_light_atomic_number: int
-        :param wall_time: wall time of the job in HH:MM:SS format
-        :type wall_time: str
         """
 
         # create gaussian files
@@ -664,13 +660,13 @@ class lsf_manager(object):
         #                    f" Not creating jobs.")
         #     return
 
-        gig.create_gaussian_files()
+        gig.create_gaussian_files('lsf')
 
         # create LSF files
         for gjf_file in glob.glob(f"{molecule_workdir}/*.gjf"):
 
             base_name = os.path.basename(os.path.splitext(gjf_file)[0])
-            self._create_lsf_file_from_gaussian_file(base_name, molecule_workdir, wall_time)
+            self._create_lsf_file_from_gaussian_file(base_name, molecule_workdir)
             # create job structure
             job = lsf_job(can=molecule.can,
                             conformation=int(base_name.split("_conf_")[1]),
@@ -724,7 +720,7 @@ class lsf_manager(object):
                 self.connection.put(f"{job.directory}/{job.base_name}.gjf", self.remote_dir)
 
                 with self.connection.cd(self.remote_dir):
-                    ret = self.connection.run(f"bsub < {self.remote_dir}/{job.base_name}.sh", hide=True)
+                    ret = self.connection.run(f"module load new gaussian nbo openblas;bsub < {job.base_name}.sh", hide=True)
                     job.job_id = re.search("Job\s*<(\d+)>", ret.stdout).group(1)
                     job.status = lsf_status.submitted
                     job.n_submissions = job.n_submissions + 1
@@ -1088,12 +1084,12 @@ class lsf_manager(object):
 
         cleanup_empty_dirs(self.workdir)
 
-    def _create_lsf_file_from_gaussian_file(self, base_name, directory, wall_time) -> None:
+    def _create_lsf_file_from_gaussian_file(self, base_name, directory) -> None:
         """Generate a single LSF submission file based on the Gaussian input file.
 
         :param base_name: base name of the Gaussian file
         :param directory: directory location of the Gaussian file
-        :param wall_time: wall time of the job in HH:MM:SS format
+        :param wall_time: wall time of the job in HH:MM format
         """
 
         # get information from gaussian file needed for submission
@@ -1103,14 +1099,14 @@ class lsf_manager(object):
         host = self.host.split(".")[0]
 
         n_processors = re.search("nprocshared=(.*?)\n", file_string).group(1)
-
+        ram = int(config['lsf']['ram_per_processor'])
+        wall_time = config['lsf']['wall_time']
 
         output = ""
         output += f"#!/bin/bash\n"
         output += f"#BSUB -n {n_processors}\n" \
-                  f"#BSUB -W {wall_time}\n"
-
-        output += f"module load gaussian\n\n"
+                  f"#BSUB -W {wall_time}\n" \
+                  f'#BSUB -R "rusage[mem={ram * 1024}]"\n'
         output += f"input={base_name}\n\n"
         output += f"# run the code \n" \
                   f"cd {self.remote_dir}\n" \
