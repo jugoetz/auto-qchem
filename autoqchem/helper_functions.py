@@ -10,11 +10,12 @@ import paramiko
 logger = logging.getLogger(__name__)
 
 
-def ssh_connect(host, user) -> fabric.Connection:
-    """Create ssh connection using fabric and paramiko, supports DUO authentication.
+def ssh_connect(host, user, keyfile=None) -> fabric.Connection:
+    """Create ssh connection using fabric and paramiko, supports DUO and SSH key authentication.
 
     :param host: remote host
     :param user: username to authenticate on remote host
+    :param keyfile: (optional) file containing the ssh key for the connection
     :return: fabric.Connection
     """
 
@@ -25,12 +26,22 @@ def ssh_connect(host, user) -> fabric.Connection:
         print(f"{title}\n{instructions}")
         return [echo and input(prompt) or getpass.getpass(prompt) for (prompt, echo) in prompt_list]
 
-    try:
-        client.connect(host, username=user)
-    except paramiko.ssh_exception.SSHException:
-        pass
+    if keyfile is not None:
 
-    client.get_transport().auth_interactive(username=user, handler=my_handler)
+        try:
+            key = paramiko.Ed25519Key.from_private_key_file(keyfile)
+            client.connect(host, username=user, pkey=key)
+
+        except paramiko.ssh_exception.PasswordRequiredException:
+            key = paramiko.Ed25519Key.from_private_key_file(keyfile,
+                                                            password=getpass.getpass('SSH key passphrase: '))
+            client.connect(host, username=user, pkey=key)
+
+        except paramiko.ssh_exception.SSHException:
+            client.get_transport().auth_interactive(username=user, handler=my_handler)
+
+    else:
+        client.get_transport().auth_interactive(username=user, handler=my_handler)
 
     c = fabric.Connection(host)
     c.client = client

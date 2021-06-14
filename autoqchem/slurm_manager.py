@@ -594,6 +594,7 @@ class lsf_manager(object):
 
         self.host = host
         self.user = user
+        self.keyfile = os.path.join(os.path.expanduser('~'), '.ssh', 'id_ed25519_euler')
         self.remote_dir = f"/cluster/scratch/{self.user}/gaussian"
         self.connection = None
 
@@ -613,7 +614,7 @@ class lsf_manager(object):
             logger.info(f"Creating connection to {self.host} as {self.user}")
             create_new_connection = True
         if create_new_connection:
-            self.connection = ssh_connect(self.host, self.user)
+            self.connection = ssh_connect(self.host, self.user, self.keyfile)
             self.connection.run(f"mkdir -p {self.remote_dir}")
             logger.info(f"Connected to {self.host} as {self.user}.")
 
@@ -884,7 +885,7 @@ class lsf_manager(object):
 
         self.submit_jobs_from_jobs_dict(incomplete_jobs_to_resubmit)
 
-    def upload_done_molecules_to_db(self, tags, cls="", subcls="",
+    def upload_done_molecules_to_db(self, tag, cls="", subcls="",
                                     type="", subtype="", RMSD_threshold=0.01, symmetry=True) -> None:
 
         """Upload done molecules to db. Molecules are considered done when all jobs for a given \
@@ -901,7 +902,7 @@ class lsf_manager(object):
 
         done_jobs = self.get_jobs(lsf_status.done)
         if not done_jobs:
-            logger.info("There are no jobs in done status. Exitting.")
+            logger.info("There are no jobs in done status. Exiting.")
             return
 
         # check if there are molecules with all jobs done
@@ -934,7 +935,7 @@ class lsf_manager(object):
                 can_keys_to_keep = [key for i, key in enumerate(keys) if i not in duplicates]
             else:
                 can_keys_to_keep = keys
-            self._upload_can_to_db(can, tasks, meta, can_keys_to_keep, tags, max_n_conf)
+            self._upload_can_to_db(can, tasks, meta, can_keys_to_keep, tag, max_n_conf)
 
     def _upload_can_to_db(self, can, tasks, meta, keys, tags, max_conf) -> None:
         """Uploading single molecule conformers to database.
