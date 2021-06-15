@@ -1,12 +1,19 @@
-# Welcome to Auto-QChem!
+# Welcome to the Auto-QChem LSF fork!
+
+This is a fork of https://github.com/PrincetonUniversity/auto-qchem to add compatibility with LSF queuing systems.
 
 ### Quick links
 
-Installation instructions https://github.com/PrincetonUniversity/auto-qchem/blob/master/Install.md
+Installation instructions https://github.com/jugoetz/auto-qchem/blob/master/Install.md
 
-DB interface user guide https://github.com/PrincetonUniversity/auto-qchem/blob/master/DB.md
+DB interface user guide https://github.com/jugoetz/auto-qchem/blob/master/DB.md
 
-Functional documentation https://princetonuniversity.github.io/auto-qchem
+Functional documentation (original version without LSF support) https://princetonuniversity.github.io/auto-qchem
+
+### Get started
+
+To get started, follow the installation instructions, then run the Jupyter notebook Tutorial_creating_descriptor_sets.ipynb.
+You will need access to an LSF cluster with Gaussian09/16 and NBO6 to follow the tutorial.
 
 ### Update your version
 
