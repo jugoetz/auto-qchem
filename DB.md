@@ -3,6 +3,10 @@
 Auto-QChem stores molecular descriptors in a MongoDB type database. A small web-based user-interface has been
  created to facilitate extractions of descriptors from the database into ```.xlsx``` files for further analysis.
 
+### Prerequisite: Install MongoDB
+
+Aside from the pymongo package, you will need to install MongoDB itself. The community edition is free. Follow the instructions for your OS at https://docs.mongodb.com/manual/installation/ 
+
 ### 1. Query available molecules
 
 Navigate to the [landing page](http://128.112.127.147)
