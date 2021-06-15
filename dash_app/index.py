@@ -42,7 +42,7 @@ def display_page(pathname, search):
                                     items_dict['tags'],
                                     items_dict['substructure'])
             except OSError as e:
-                return layout_table(None, None, None, None, None, None, None,
+                return layout_table(None, None, None, None, None, None,
                                     message=f"Substructure '{items_dict['substructure']}'"
                                             f" is an invalid SMARTS pattern.")
     elif pathname.startswith(f"/descriptors/"):
@@ -209,5 +209,5 @@ def on_post():
 
 
 if __name__ == '__main__':
-    server.run(port=80)
-    # app.run_server(debug=True, port=80)
+    server.run(port=8050, debug=True)
+    # app.run_server(debug=True, port=8050)

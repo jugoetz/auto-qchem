@@ -11,7 +11,7 @@ lsf:
     ram_per_processor: 6
 
 mongoDB:
-    host: "128.112.127.147"
+    host: "127.0.0.1"
     port: 27017
     user: "autoqchem"
     password: "dftworks"

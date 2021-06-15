@@ -34,9 +34,10 @@ def db_connect(collection=None) -> pymongo.collection.Collection:
     """
 
     cli = pymongo.MongoClient(config['mongoDB']['host'],
-                              username=config['mongoDB']['user'],
-                              password=config['mongoDB']['password'],
-                              port=config['mongoDB']['port'])
+                              # username=config['mongoDB']['user'],
+                              # password=config['mongoDB']['password'],
+                              port=config['mongoDB']['port']
+                              )
     if collection is None:
         return cli['autoqchem']
     else:
