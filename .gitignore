@@ -1,0 +1,15 @@
+# auto-generated directories
+/auto_qchem.egg-info
+/build
+/dist
+
+# Pycharm
+/.idea
+
+# recursively ignore user-generated files from dash/flask (keep the directories)
+/dash_app/static/**
+!/dash_app/static/**/
+!/dash_app/static/**/.gitkeep
+
+# Jupyter
+notebooks/.ipynb_checkpoints
