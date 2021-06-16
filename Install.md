@@ -66,4 +66,22 @@ jupyter-notebook framework_functionality_test.ipynb
 ```
 Run the notebook!
 
+### (Optional) Install Mordred
+For one of the notebooks to work, you will need to install [```mordred```](https://github.com/mordred-descriptor/mordred). The 
+installation instructions for the package are unfortunately outdated (as of 06/2021).
+Install ```mordred``` like this:
+```bash
+conda install -c rdkit -c mordred-descriptor mordred
+conda install nose
+conda install networkx=2.3
+# the last one should have already been installed during the autoqchem installation, but if it has not:
+conda install pyyaml
+```
+Now, navigate to your python site-package directory and in ```mordred/tests/``` find the file ```test_pandas.py```. Replace all calls to 
+```.ix``` with ```.iat``` (```.ix``` was deprecated in pandas). Finally, run the tests:
+```bash
+python -m mordred.tests
+```
+
+
 
